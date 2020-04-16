@@ -4,7 +4,6 @@ CLOOP    JSUB   RDREC
          LDA    LENGTH            TEST FOR EOF
          COMP   ZERO
          JEQ    ENDFIL
-         JSUB   WRREC
          J      CLOOP
          BASE
 ENDFIL   LDA    =C'EOF'
@@ -12,11 +11,11 @@ ENDFIL   LDA    =C'EOF'
          STA    BUFFER
          LDA    THREE8
          STA    LENGTH
-         JSUB   WRREC
          LDL    RETADR
          RSUB
          LTORG
 EOF      BYTE   C'EOF'
+         BYTE   X'F1'
 THREE    WORD   3
 ZERO     WORD   0
 RETADR   RESW   1
