@@ -6,12 +6,11 @@ CLOOP    JSUB   RDREC
          JEQ    ENDFIL
          J      CLOOP
          BASE
-ENDFIL   LDA    =C'EOF'
+ENDFIL   LDB    =C'EOF'
          LDA    =X'F1'
          STA    BUFFER
-         LDA    THREE8
+         LDA    THREE
          STA    LENGTH
-         LDL    RETADR
          RSUB
          LTORG
 EOF      BYTE   C'EOF'
@@ -25,14 +24,12 @@ BUFFER   RESB   4096
 RDREC    LDX    ZERO
          LDA    ZERO
          LDA    =X'F2'
-RLOOP    TD     INPUT
+RLOOP    TD     LENGTH
          JEQ    RLOOP
-         RD     INPUT
          COMP   ZERO
          JEQ    EXIT
          STCH   BUFFER,X
-         TIX    MAXLEN
          JLT    RLOOP
 EXIT     STX    LENGTH
          RSUB       
-         END    FIRST          
+         END    FIRST         

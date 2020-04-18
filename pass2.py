@@ -13,10 +13,10 @@ def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, pro
     #read  all input lines
     sic_assembly = intermid_file.readlines()
 
-    #create a .lst files  
+    #create a .lst file  
     list_file = open("list.lst","w+")
 
-    #create a .obj files  
+    #create a .obj file
     object_file = open("objectfile.obj","w+")
 
     error_flag = 0
@@ -45,19 +45,13 @@ def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, pro
             
             #initilize next text record
             text_record = 'T'+"0"*2+line[ind+1][0:5]
-            text_record_object_code = ""
-            
-            
+            text_record_object_code = "" 
             continue
-            
 
         if opcode !='END':
-            
-            
-            object_code = ""
-            
+
+            object_code = ""      
             if opcode not in directives:
-    
                 #first segment of opject code
 
                 #if opcode is opcode
@@ -90,6 +84,10 @@ def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, pro
                     if operand in literal_tab :
                         operand = literal_tab[operand][2]
                         object_code += (str(operand))
+                elif lit == False:
+                    print("ERROR!, you are using a not correct symbol")
+                    error_flag = 1
+                    break
 
             #if opcode is a directive
             elif opcode == "BYTE":
@@ -105,7 +103,9 @@ def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, pro
                 blanks = 6-len(object_code)
                 object_code = "0"*blanks+object_code
 
-            list_file.write(line[:-1]+"  "+object_code+"\n")
+            #write the object code on .lst file
+            blanks = 45-len(line)
+            list_file.write(line[:-1]+" "*blanks+object_code+"\n")
             
             if text_record_length + len(object_code) <=60:
                 text_record_object_code +=object_code
@@ -116,11 +116,10 @@ def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, pro
                 text_record = 'T'+ '0'*2+line[0:5]
                 text_record_length = 0
                 text_record_object_code = ""
-        
-                
-                
+
+        #if the line is END line
         else:
-            list_file.write(line.strip())
+            list_file.write(" "*15+line.strip()+"\n")
             end_record = 'E'+"0"*2+hex(int(start_add))[2:]
             object_file.write("\n"+end_record)
                 
