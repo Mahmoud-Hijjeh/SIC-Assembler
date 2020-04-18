@@ -184,7 +184,7 @@ for ind, line in enumerate(sic_assembly):
 if line[34:] != "":
     line = line[:34]+"\n"
 if(opcode == "END"):
-    intermid_file.write(" "*6+line)
+    intermid_file.write(" "*6+line+"\n")
 
 #place literals into apool at the end of prog
 #if not LTORG has came after them 

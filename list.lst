@@ -1,39 +1,40 @@
 1000  COPY     START  1000 
-1000  FIRST    STL    RETADR              141035
-1003  CLOOP    JSUB   RDREC  48203b
-1006           LDA    LENGTH              001038
-1009           COMP   ZERO  281032
-100c           JEQ    ENDFIL  301012
-100f           J      CLOOP  3C1003
-               BASE  
-1012  ENDFIL   LDA    =C'EOF'  001027
-1015           LDA    =X'F1'  00102a
-1018           STA    BUFFER  0C103b
-101b           LDA    THREE8  00
-101e           STA    LENGTH  0C1038
-1021           LDL    RETADR  081035
-1024           RSUB  4C0000
-               LTORG  
-1027  *       =C'EOF'  454f46
-102a  *       =X'F1'  F1
-102b  EOF      BYTE   C'EOF'  454f46
-102e           BYTE   X'F1'  0000F1
-102f  THREE    WORD   3  000003
-1032  ZERO     WORD   0  000000
-1035  RETADR   RESW   1  
-1038  LENGTH   RESW   1  
-103b  BUFFER   RESB   4096  
-203b  RDREC    LDX    ZERO  041032
-203e           LDA    ZERO  001032
-2041           LDA    =X'F2'  002062
-2044  RLOOP    TD     INPUT  E0
-2047           JEQ    RLOOP  302044
-204a           RD     INPUT  D8
-204d           COMP   ZERO  281032
-2050           JEQ    EXIT  30205c
-2053           STCH   BUFFER,X  54903b
-2056           TIX    MAXLEN  2C
-2059           JLT    RLOOP  382044
-205c  EXIT     STX    LENGTH  101038
-205f           RSUB         4C0000
-END    FIRST          2062  *       =X'F2'
+1000  FIRST    STL    RETADR                          1410351035
+1003  CLOOP    JSUB   RDREC               48203b203b
+1006           LDA    LENGTH                          0010381038
+1009           COMP   ZERO                2810321032
+100c           JEQ    ENDFIL              3010121012
+100f           J      CLOOP               3C10031003
+               BASE                    
+'EOF'              001027
+1015           LDA    =X'F1'               00102a
+1018           STA    BUFFER              0C103b
+101b           LDA    THREE               00102f
+101e           STA    LENGTH              0C1038
+1021           LDL    RETADR              081035
+1024           RSUB                    4C
+               LTORG                    
+1027  *       =C'EOF'                    454f46
+102a  *       =X'F1'                    F1
+102b  EOF      BYTE   C'EOF'              454f46
+102e           BYTE   X'F1'               0000F1
+102f  THREE    WORD   3                   000003
+1032  ZERO     WORD   0                   000000
+1035  RETADR   RESW   1                   
+1038  LENGTH   RESW   1                   
+103b  BUFFER   RESB   4096                
+203b  RDREC    LDX    ZERO                041032
+203e           LDA    ZERO                001032
+2041           LDA    =X'F2'               002062
+2044  RLOOP    TD     INPUT               E0
+2047           JEQ    RLOOP               302044
+204a           RD     INPUT               D8
+204d           COMP   ZERO                281032
+2050           JEQ    EXIT                30205c
+2053           STCH   BUFFER,X            54
+2056           TIX    MAXLEN              2C
+2059           JLT    RLOOP               382044
+205c  EXIT     STX    LENGTH              101038
+205f           RSUB                           4C
+               END    FIRST          
+2062  *       =X'F2'                    F2

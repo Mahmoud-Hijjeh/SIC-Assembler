@@ -9,7 +9,7 @@ CLOOP    JSUB   RDREC
 ENDFIL   LDA    =C'EOF'
          LDA    =X'F1'
          STA    BUFFER
-         LDA    THREE8
+         LDA    THREE
          STA    LENGTH
          LDL    RETADR
          RSUB

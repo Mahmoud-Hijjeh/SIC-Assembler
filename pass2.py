@@ -55,6 +55,7 @@ def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, pro
             
             
             object_code = ""
+            indexed="0"
             
             if opcode not in directives:
     
@@ -69,27 +70,37 @@ def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, pro
                     lit = True
                     if opcode in literal_tab:
                         object_code = str(literal_tab[opcode][0])
+                
+                if operand != "":
 
-                #second and third segment of opject code
-                if operand in symbol_table:
-                    object_code += (str(symbol_table[operand]))
+                    #second and third segment of opject code
+                    if operand in symbol_table:
+                        object_code += (str(symbol_table[operand]))
+    
+                    elif operand == "" and lit == False:
+                        object_code +="0000"
+                    
+                    elif '=' in operand:
+                        operand = operand[1:]
+                        if operand in literal_tab :
+                            lit_add = literal_tab[operand][2]
+                            object_code += (str(lit_add))
+                    
+                    elif operand in symbol_table:
+                        if ',X' in operand:
+                            indexed = "1"
+                            indexed_operand = operand[:-2]
+                        else:
+                            indexed_operand = operand
+                        #take first halfbyte from the operand
+                        z = str(symbol_table[indexed_operand])[0]
+                        z = (indexed+bin(int(z, 16))[2:].zfill(3))
+                        z = hex(int(z, 2))[2:]
+                        object_code += (z+str(symbol_table[indexed_operand])[1:])
+                    else:
+                        print("error,the symbol not exist in symbol table")
 
-                elif operand == "" and lit == False:
-                    object_code +="0000"
-
-                elif ',X' in operand:
-                    #take first halfbyte from the operand
-                    operand = operand[:-2]
-                    z = str(symbol_table[operand])[0]
-                    z = ("1"+bin(int(z, 16))[2:].zfill(3))
-                    z = hex(int(z, 2))[2:]
-                    object_code += (z+str(symbol_table[operand])[1:])
-
-                elif '=' in operand:
-                    operand = operand[1:]
-                    if operand in literal_tab :
-                        operand = literal_tab[operand][2]
-                        object_code += (str(operand))
+                
 
             #if opcode is a directive
             elif opcode == "BYTE":
@@ -104,10 +115,11 @@ def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, pro
                 object_code = hex(int(operand))[2:]
                 blanks = 6-len(object_code)
                 object_code = "0"*blanks+object_code
-
-            list_file.write(line[:-1]+"  "+object_code+"\n")
             
-            if text_record_length + len(object_code) <=60:
+            line = line.replace("\n","")
+            list_file.write(line[:]+" "*(20 - len(operand))+object_code+"\n")
+            
+            if (text_record_length + len(object_code)) <=60 and (opcode !='RESW' and opcode != 'RESB'):
                 text_record_object_code +=object_code
                 text_record_length += len(object_code)
             else:
@@ -120,7 +132,7 @@ def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, pro
                 
                 
         else:
-            list_file.write(line.strip())
+            list_file.write(line[:-1]+"\n")
             end_record = 'E'+"0"*2+hex(int(start_add))[2:]
             object_file.write("\n"+end_record)
                 

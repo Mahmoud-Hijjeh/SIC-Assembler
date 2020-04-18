@@ -9,7 +9,7 @@
 1012  ENDFIL   LDA    =C'EOF'
 1015           LDA    =X'F1'
 1018           STA    BUFFER
-101b           LDA    THREE8
+101b           LDA    THREE
 101e           STA    LENGTH
 1021           LDL    RETADR
 1024           RSUB
@@ -36,4 +36,5 @@
 2059           JLT    RLOOP
 205c  EXIT     STX    LENGTH
 205f           RSUB       
-               END    FIRST          2062  *       =X'F2'
+               END    FIRST          
+2062  *       =X'F2'
