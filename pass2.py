@@ -13,16 +13,17 @@ def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, pro
     #read  all input lines
     sic_assembly = intermid_file.readlines()
 
-    #create a .lst files  
+    #create a .lst file  
     list_file = open("list.lst","w+")
 
-    #create a .obj files  
+    #create a .obj file
     object_file = open("objectfile.obj","w+")
 
     error_flag = 0
     text_record=""
     text_record_length=0
     for ind, line in enumerate(sic_assembly):
+        
         lit = False
         header_record = ""
 
@@ -45,20 +46,18 @@ def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, pro
             
             #initilize next text record
             text_record = 'T'+"0"*2+line[ind+1][0:5]
-            text_record_object_code = ""
-            
-            
+            text_record_object_code = "" 
             continue
-            
 
         if opcode !='END':
+ 
             
             
             object_code = ""
             indexed="0"
             
+ 
             if opcode not in directives:
-    
                 #first segment of opject code
 
                 #if opcode is opcode
@@ -71,7 +70,7 @@ def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, pro
                     if opcode in literal_tab:
                         object_code = str(literal_tab[opcode][0])
                 
-                if operand != "":
+                elif operand != "":
 
                     #second and third segment of opject code
                     if operand in symbol_table:
@@ -80,27 +79,34 @@ def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, pro
                     elif operand == "" and lit == False:
                         object_code +="0000"
                     
-                    elif '=' in operand:
-                        operand = operand[1:]
-                        if operand in literal_tab :
-                            lit_add = literal_tab[operand][2]
-                            object_code += (str(lit_add))
                     
-                    elif operand in symbol_table:
-                        if ',X' in operand:
+                    
+                    elif operand in symbol_table or operand[1:] in literal_tab:
+                        #if '=' in operand:
+                            #constantOperand = operand[1:]
+                        if operand in literal_tab :
+                            add = literal_tab[operand][2]
+                            #object_code += (str(lit_add))
+                            
+                        elif ',X' in operand:
                             indexed = "1"
                             indexed_operand = operand[:-2]
+                            add = symbol_table[indexed_operand]
                         else:
                             indexed_operand = operand
+                            add = symbol_table[indexed_operand]
                         #take first halfbyte from the operand
-                        z = str(symbol_table[indexed_operand])[0]
+                        z = str(add)[0]
                         z = (indexed+bin(int(z, 16))[2:].zfill(3))
                         z = hex(int(z, 2))[2:]
-                        object_code += (z+str(symbol_table[indexed_operand])[1:])
+                        object_code += (z+str(add)[1:])
                     else:
                         print("error,the symbol not exist in symbol table")
+                        error_flag += 1
+                        break
+                            
 
-                
+ 
 
             #if opcode is a directive
             elif opcode == "BYTE":
@@ -115,11 +121,17 @@ def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, pro
                 object_code = hex(int(operand))[2:]
                 blanks = 6-len(object_code)
                 object_code = "0"*blanks+object_code
+ 
+
+            #write the object code on .lst file
+            blanks = 45-len(line)
+            list_file.write(line[:-1]+" "*blanks+object_code+"\n")
+ 
             
-            line = line.replace("\n","")
-            list_file.write(line[:]+" "*(20 - len(operand))+object_code+"\n")
+            #line = line.replace("\n","")
+            #ist_file.write(line[:]+" "*(20 - len(operand))+object_code+"\n")
             
-            if (text_record_length + len(object_code)) <=60 and (opcode !='RESW' and opcode != 'RESB'):
+            if (text_record_length + len(object_code)) <=60 and (opcode !='RESW' and opcode != 'RESB'  and opcode != 'BASE' and opcode != 'LTORG'):
                 text_record_object_code +=object_code
                 text_record_length += len(object_code)
             else:
@@ -128,16 +140,15 @@ def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, pro
                 text_record = 'T'+ '0'*2+line[0:5]
                 text_record_length = 0
                 text_record_object_code = ""
-        
-                
-                
+
+        #if the line is END line
         else:
-            list_file.write(line[:-1]+"\n")
+            list_file.write(" "*15+line.strip()+"\n")
             end_record = 'E'+"0"*2+hex(int(start_add))[2:]
             object_file.write("\n"+end_record)
                 
     
-            print(object_code)
+             
             
 
 
