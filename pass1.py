@@ -70,17 +70,22 @@ if first_line[9:15].strip() == "START":
     blanks = 6-len(str((loc_ctr)))
 
     #write line to intemediate file
+    if first_line[34:] != "":
+        first_line = first_line[:34]+"\n"
     intermid_file.write(hex(loc_ctr)[2:]+" "*blanks+first_line)
     
 else:
     loc_ctr = 0
 
 for ind, line in enumerate(sic_assembly):
+    
+    if line.strip() == "":
+        continue
     #read opcode
     opcode = line[9:15].strip()
     if opcode == "END":
         break
-    elif opcode != "START":
+    elif opcode != "START" :
         #if this is not a comment line
         if line[0] != '.':
             if line[34:] != "":
@@ -181,6 +186,7 @@ for ind, line in enumerate(sic_assembly):
                     literalList=[hexCode,len(hexCode)/2, 0]
                     literal_table[literal]= literalList
                     literal_tab[literal]= literalList
+                 
 if line[34:] != "":
     line = line[:34]+"\n"
 if(opcode == "END"):
@@ -203,37 +209,7 @@ sic_source_file.close()
 opcode_table_file.close()
 intermid_file.close()
 
-""" 
+ 
 if error_flag != 1:
-    pl = hex(int(prog_leng))[2:].format(int(prog_leng))
-    lc = hex(int(loc_ctr))[2:].format(int(loc_ctr))
-    print("name of the program: ",prog_name)
-    print("length of the program: ",pl)
-    print("LOCCTR: ",lc)
-    print("symbol table : ",symbol_table)
-    print("literal table : ",literal_tab)
-
-    SymbolTable = "\nSymbol"+" "*4+"address\n"
-    for Symbol in symbol_table:
-        blanks = 8-len(Symbol)
-        SymbolTable += (Symbol+" "*blanks+"  "+ symbol_table[Symbol] + '\n')
-
-    literalTable = "\nliteral"+" "*3+"value"+" "*9+"length"+" "*3+"address\n"
-    for literal in literal_tab:
-        blanks = 10-len(str(literal))
-        b = blanks*2
-        literalTable += (literal+" "*blanks+ str(literal_tab[literal][0])+" "*b+str(literal_tab[literal][1])+" "*9+str(literal_tab[literal][2]) + '\n')
-
-    root = tk.Tk()
-    root.title("output of pass1")
-    programName = tk.Text(root, height=60, width=80)
-    programName.pack()
-    quote = "program name: "+prog_name+"\n\nLocation counter: "+lc+"\n\nthe length of the program: "+pl+"\n\nSYMTAB: "+SymbolTable+"\n\nLITTAB: "+literalTable
-    programName.insert(tk.END, quote)
-
-    root.mainloop()
- """
-
-
-import pass2
-pass2.send_tables(symbol_table, opt_table, literal_tab, directives,prog_name, prog_leng, start_add)
+    import pass2 
+    pass2.send_tables(symbol_table, opt_table, literal_tab, directives,prog_name, prog_leng, start_add, loc_ctr)
