@@ -72,9 +72,9 @@ def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, pro
             object_file.write(header_record)
             
             #initilize next text record
-            text_record = 'T'+"0"*2+sic_assembly[ind+1][0:5].strip()+"^"
-            
-            text_record_object_code = "" 
+            if ind+1 not in range(len(sic_assembly)):
+                text_record = 'T'+"0"*2+sic_assembly[ind+1][0:5].strip()+"^"
+                text_record_object_code = "" 
             continue
         
         if opcode != 'START' and ind == 0:
