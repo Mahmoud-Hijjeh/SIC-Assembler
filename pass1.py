@@ -1,13 +1,19 @@
+'''
+SicAssembler V16.00 with GUI in Python
+
+'''
 """ The output of Pass 1 is:
-1. Symbol Table SYBTAB: should be displayed on the screen.
+1. Symbol Table SYBTAB: displayed on the screen.
 2. LOCCTR, PRGLTH, PRGNAME, ...
 3. Intermediate file (.mdt): Stored on the secondary storage. 
-4.Your assembler can stop execution if there are errors in Pass 1"""
+4.My assembler can stop execution if there are errors in Pass 1
+"""
 
-
-#TEAM MEMBERS
-#samar jamjom
-#latifa masri
+# Phase 1
+# Student: Mahmoud Majed Hasan Hijjeh 
+# ID: (217090)
+# Supervisor: Dr. Yousef Salah
+# Introduction to Systems Programming course
 
 
 import guiForm
@@ -19,18 +25,25 @@ source_code,intermid_file = guiForm.gui_fun()
 if source_code == "":
     messagebox.showerror("ERROR ","Please only Browse to get full path of .asm file!\n" \
                                 "\n\nError MSG: {0}")
-#open source file to read it
+# Open source file to read it
 sic_source_file = open(source_code, "r")
 
-#open OPTAP file to read it
+# Open OPTAP file to read it
 opcode_table_file = open("OPTAB.txt", "r")
 
-#read  all input lines
+# Read  all input lines
 sic_assembly = sic_source_file.readlines()
 
-#read opcode table 
+# Read opcode table 
 opcode_table = opcode_table_file.readlines()
 
+# Initialize instruction component
+label = ""
+opcode = ""
+operand = 0
+comment = ""
+
+# Data Structure and Flags
 symbol_table = {}
 opt_table = {}
 literal_table = {}
@@ -41,35 +54,33 @@ start_add = 0
 error_flag = 0
 
 
-#initialize instruction component
-label = ""
-opcode = ""
-operand = 0
-comment = ""
 
-#create a .text files  
+
+# Create a .text file 
 intermid_file = open(intermid_file+".mdt","w+")
 
-#initialize a list of directives
+# Initialize a list of directives
 directives = ["START", "END", "BYTE", "WORD", "RESB", "RESW", "BASE", "LTORG"]
 
-#store opcode table in 2D list
+# Store opcode table in 2D list
 for ind, line in enumerate(opcode_table):
-    #read file from third line 
+    # Read file from third line 
     if ind>1:
         opt_table[line[0:11].split(' ')[0]] = line[12:15].strip()
 
-#read first input line
+# Read first input line
 first_line = sic_assembly[0]
-if first_line[9:15].strip() == "START":
-    prog_name =  first_line[0:8].strip()
-    start_add = int(first_line[16:35].strip(),16)
+if first_line[11:20].strip() == "START":
+    prog_name =  first_line[0:10].strip()
+    start_add = int(first_line[21:39].strip(),16)
     loc_ctr = start_add
 
-    #to save a fixed format in intermediate file 
+    # To save a fixed format in intermediate file 
     blanks = 6-len(str((loc_ctr)))
+    #print(loc_ctr)
+    #print(str((loc_ctr)))
 
-    #write line to intemediate file
+    # Write line to intemediate file
     if first_line[34:] != "":
         first_line = first_line[:34]+"\n"
     intermid_file.write(hex(loc_ctr)[2:]+" "*blanks+first_line)
@@ -81,68 +92,68 @@ for ind, line in enumerate(sic_assembly):
     
     if line.strip() == "":
         continue
-    #read opcode
-    opcode = line[9:15].strip()
+    # Read opcode
+    opcode = line[11:20].strip()
     if opcode == "END":
         break
     elif opcode != "START" :
-        #if this is not a comment line
+        # If this is not a comment
         if line[0] != '.':
-            if line[34:] != "":
-                line = line[:34]+"\n"
+            if line[38:] != "":
+                line = line[:38]+"\n"
                 
-            #write line to intemediate file
-            #check if that line is LTORG
+            # Write line to intemediate file
+            # Check if that line is LTORG
             if(opcode == "LTORG" or opcode == "BASE"):
                 intermid_file.write(" "*6+line)
             else :
-                #to save a fixed format in intermediate file
+                # To save a fixed format in intermediate file
                 blanks = 6-len(str(hex(loc_ctr)[2:]))
                 intermid_file.write(hex(loc_ctr)[2:]+" "*blanks+line)
             
-            #read label field
-            label = line[0:8].strip()
-            #if there is asymbol in label field
+            # Read label field
+            label = line[0:10].strip()
+            # If there is a symbol in label field
             if label != "":
-                #serch SYMTAB for LABEL
-                #if found
+                # Search in SYMTAB for LABEL
+                # If found
                 if label in symbol_table:
-                    #set error flag
+                    # Set error flag
                     error_flag = 1
                     print("ERROR, Duplicate symbol!")
-                    # message box display
+                    # Message box display
                     messagebox.showerror("ERROR ","Duplicate symbol!\n" \
                                 "\n\nError MSG: {0}")
                     break
-                #else insert [label, LOCCTR] into SYMTAB
+                # Else insert [label, LOCCTR] into SYMTAB
                 else:
                     symbol_table[label] = hex(loc_ctr)[2:]
 
-            #read opcode field
-            #search OPTAB for OPCODE
-            #if found
+            # Read opcode field
+            # Search OPTAB for OPCODE
+            # If found
             if opcode in opt_table:
-                #add 3 {instruction length} to LOCCTR
+                # Add 3 {instruction length} to LOCCTR
                 loc_ctr += 3
-            #if not found
+            # If not found
             elif opcode in directives:
                 if opcode == "WORD":
-                    #add 3 {instruction length}
+                    # Add 3 {instruction length}
                     loc_ctr += 3
                 elif opcode == "RESW":
-                    operand = line[16:35].strip()
+                    operand = line[21:39].strip()
                     loc_ctr += 3 * int(operand)
                 elif opcode == "RESB":
-                    operand = line[16:35].strip()
+                    operand = line[21:39].strip()
                     loc_ctr += int(operand)
                 elif opcode == "BYTE":
-                    operand = line[16:35].strip()
-                    #find the length of constant in bytes and add it to loc_ctr
+                    operand = line[21:39].strip()
+                    # Find the length of constant in bytes and add it to loc_ctr
                     if operand[0] == 'X':
                         loc_ctr += int((len(operand) - 3)/2)
                     elif operand[0] == 'C':
                         loc_ctr += (len(operand) - 3)
-                #place literals into a pool at some location in object program
+                # Place literals into a pool at some location in object program
                 elif opcode == "LTORG":
                     for key in literal_table:
                         literal_table[key][2] = hex(loc_ctr)[2:]
@@ -151,49 +162,48 @@ for ind, line in enumerate(sic_assembly):
                         loc_ctr += int(literal_table[key][1])
                     literal_table = {}
             else:
-                #set error flag
+                # Set error flag
                 error_flag = 1
                 print("ERROR, Invalid operation code")
-                # message box display
+                # Message box display
                 messagebox.showerror("invalid operation code","Please enter valid operation code\n" \
                                 "\n\nError MSG: {0}")
                 break
                     
-            #check if line contain literal
-            if line[16:17] == '=':
+            # Check if line contain literal
+            if line[21:22] == '=':
                 literalList = []
                 isExist = 1
-                literal = line[17:35].strip()
+                literal = line[22:39].strip()
                 if literal[0]=='C':
                     hexCode = literal[2:-1].encode("utf-8").hex()
                 elif literal[0]== 'X':
                     hexCode = literal[2:-1]
                 else:
-                    #set error flag
+                    # Set error flag
                     error_flag = 1
                     print("invalid literals")
-                    # message box display
+                    # Message box display
                     messagebox.showerror("invalid literals","Please enter valid literal\n" \
                                 "E.g.: =C'' or =X''"
                                 "\n\nError MSG: {0}")
-                #find literal in table literal
+                # Find literal in table literal
 
                 if literal in literal_tab:
                     isExist = 0
                 
-                #if literal not exist in literal tabel 
+                # If literal not exist in literal tabel 
                 if isExist:
                     literalList=[hexCode,len(hexCode)/2, 0]
                     literal_table[literal]= literalList
                     literal_tab[literal]= literalList
-                 
-if line[34:] != "":
-    line = line[:34]+"\n"
+if line[38:] != "":
+    line = line[:38]+"\n"
 if(opcode == "END"):
     intermid_file.write(" "*6+line+"\n")
 
-#place literals into apool at the end of prog
-#if not LTORG has came after them 
+# Place literals into apool at the end of prog
+# If not LTORG has came after them 
 if literal_table:
     for key in literal_table:
         literal_table[key][2] = hex(loc_ctr)[2:]
@@ -201,15 +211,15 @@ if literal_table:
         intermid_file.write(hex(loc_ctr)[2:]+" "*blanks+"*"+" "*7+"="+key+"\n")
         loc_ctr += int(literal_table[key][1])
 
-#save (loc_ctr - starting add ) as program length
+# Save (loc_ctr - starting add ) as program length
 prog_leng = int(loc_ctr) - int(start_add)
 
-#close file
+# Close files
 sic_source_file.close()
 opcode_table_file.close()
 intermid_file.close()
 
- 
+
 if error_flag != 1:
     import pass2 
     pass2.send_tables(symbol_table, opt_table, literal_tab, directives,prog_name, prog_leng, start_add, loc_ctr)

@@ -1,16 +1,28 @@
-# -*- coding: utf-8 -*-
- 
-""" The output of Pass 2:
+# -*- Coding: utf-8 -*-
+'''
+SicAssembler V16.00 with GUI in Python
+
+''' 
+
+""" 
+The output of Pass 2:
 1. The object file (.obj)
 2. The listing file (.lst)
 3. List of errors if happened (duplicate labels, invalid mnemonic,
-inappropriate operand...). """
- 
- 
+inappropriate operand...). 
+
+"""
+# Phase 2
+# Student: Mahmoud Majed Hasan Hijjeh 
+# ID: (217090)
+# Supervisor: Dr. Yousef Salah
+# Introduction to Systems Programming course
+
+
 from tkinter import messagebox
 import tkinter as tk
- 
-                              
+
+
 def modify_add(address, indexed, object_code):
 
     z = str(address)[0]
@@ -26,22 +38,21 @@ def write_to_text_record(object_file, text_record_length, text_record_object_cod
     object_file.write("\n"+text_record)
 
 
- 
         
 
 
 def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, prog_leng, start_add, loc_ctr):
-
-    #open source file to read it
+    text_record_object_code = ""
+    # Open source file to read it
     intermid_file = open("intermid.mdt", "r")
 
-    #read  all input lines
+    # Read  all input lines
     sic_assembly = intermid_file.readlines()
 
-    #create a .lst file  
+    # Create .lst file  
     list_file = open("list.lst","w+")
 
-    #create a .obj file
+    # Create .obj file
     object_file = open("objectfile.obj","w+")
 
     error_flag = 0
@@ -54,24 +65,24 @@ def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, pro
         lit = False
         header_record = ""
 
-        opcode = line[15:21].strip()
-        operand = line[22:41].strip()
-        #read first input line
+        opcode = line[17:26].strip()
+        operand = line[27:48].strip()
+        # Read first input line
         if opcode == 'START' and ind == 0:
-            #write listing file
+            # Write listing file
             list_file.write(line)
             
-            #create header record 
+            # Create header record 
             blanks = 6-len(str((prog_name)))
             prog_name+=' '*blanks
             start_add="0"*2+str(hex(start_add)[2:])
             prog_leng = (6-len(str(prog_leng)))*'0'+str(hex(prog_leng)[2:])
             header_record +=('H'+prog_name+start_add+prog_leng)
             
-            #write header record to object program
+            # Write header record to object program
             object_file.write(header_record)
             
-            #initilize next text record
+            # Initilize next text record
             if ind+1 not in range(len(sic_assembly)):
                 text_record = 'T'+"0"*2+sic_assembly[ind+1][0:5].strip()+"^"
                 text_record_object_code = "" 
@@ -81,31 +92,30 @@ def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, pro
             header_record +=('H'+prog_name+"000000"+hex(prog_leng)[2:])
             start_add = "000000"
             prog_leng = hex(loc_ctr)[2:]
-            #write header record to object program
+            # Write header record to object program
             object_file.write(header_record)
             
-            #initilize next text record
+            # Initilize next text record
             text_record = 'T'+"0"*2+sic_assembly[ind+1][0:5].strip()+"^"
             text_record_object_code = ""
-        #if opcode !='END':
+        # If opcode !='END':
 
         object_code = ""      
         if opcode not in directives:
-            #first segment of opject code
+            # First segment of opject code
 
-            #if opcode is opcode
+            # If opcode in opcode table
             if opcode in opt_table:
                 object_code += opt_table[opcode]
 
-            #if opcode is litteral
-            elif line[14:15] == "=":
+            # If opcode is litteral
+            elif line[16:17] == "=":
                 lit = True
                 if opcode in literal_tab:
                     object_code = str(literal_tab[opcode][0])
 
-                 
             
-            #second and third segment of opject code
+            # Second and third segment of object code
             if operand in symbol_table:
                 add = symbol_table[operand]
                 object_code = modify_add(add, "0", object_code)
@@ -115,7 +125,7 @@ def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, pro
                 object_code +="0000"
 
             elif ',X' in operand:
-                #take first halfbyte from the operand
+                # Take first half byte from the operand
                 operand = operand[:-2]
                 add = symbol_table[operand]
                 object_code = modify_add(add, "1", object_code)
@@ -134,7 +144,7 @@ def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, pro
                                 "\n\nError MSG: {0}")
                 break
 
-        #if opcode is a directive
+        # If opcode is a directive
         elif opcode == "BYTE":
             if operand[0] == 'X':
                 object_code = operand[2:-1]     
@@ -147,7 +157,7 @@ def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, pro
             blanks = 6-len(object_code)
             object_code = "0"*blanks+object_code
 
-        #write the object code on .lst file
+        # Write the object code on .lst file
         blanks = 45-len(line)
         list_file.write(line[:-1]+" "*blanks+object_code+"\n")
 
@@ -161,7 +171,7 @@ def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, pro
             
 
         
-        if (discnt == True) and (sic_assembly[ind+1][15:21].strip()!='RESW' and sic_assembly[ind+1][15:21].strip()!='RESB'): 
+        if (discnt == True) and (sic_assembly[ind+1][17:26].strip()!='RESW' and sic_assembly[ind+1][17:26].strip()!='RESB'): 
             write_to_text_record(object_file, text_record_length, text_record_object_code, text_record)
             text_record = 'T'+ '0'*2+sic_assembly[ind+1][0:5]+"^"
             text_record_length = 0
@@ -182,7 +192,7 @@ def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, pro
             write_to_text_record(object_file, text_record_length, text_record_object_code, text_record)
             
 
-        #if the line is END line
+        # If the line is END line
         if opcode == "END":
             end_exist = True
         
@@ -194,7 +204,7 @@ def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, pro
       
     loc_ctr=hex(loc_ctr)[2:]
     
-    #close file
+    # Close files
     object_file.close()
     list_file.close()
     intermid_file.close()
@@ -226,8 +236,8 @@ def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, pro
         programName.pack()
         quote = "\n\nprogram name: "+prog_name+"\n\nLocation counter: "+lc+"\n\nthe length of the program: "+pl+"\n\nSYMTAB: "+SymbolTable+"\n\nLITTAB: "+literalTable+"\n\n the intermediate file has been successfully extracted into 'intermid.mdt'\n\n the listing file has been successfully extracted into 'list.lst' \n\n the program file has been successfully extracted into 'objectfile.obj' "
         programName.insert(tk.END, quote)
-        #B = tk.Button(root, text ="open intermidiate file", command = lambda:openIntermidiateFile)
+        # B = tk.Button(root, text ="open intermidiate file", command = lambda:openIntermidiateFile)
 
-        #B.pack()
+        # B.pack()
     
         root.mainloop()
