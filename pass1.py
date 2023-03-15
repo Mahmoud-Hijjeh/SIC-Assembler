@@ -83,7 +83,7 @@ if first_line[11:20].strip() == "START":
     # Write line to intemediate file
     if first_line[34:] != "":
         first_line = first_line[:34]+"\n"
-    intermid_file.write(hex(loc_ctr)[2:]+" "*blanks+first_line)
+    intermid_file.write('{0:02X}'.format(loc_ctr)+" "*blanks+first_line)
     
 else:
     loc_ctr = 0
@@ -109,7 +109,7 @@ for ind, line in enumerate(sic_assembly):
             else :
                 # To save a fixed format in intermediate file
                 blanks = 6-len(str(hex(loc_ctr)[2:]))
-                intermid_file.write(hex(loc_ctr)[2:]+" "*blanks+line)
+                intermid_file.write('{0:02X}'.format(loc_ctr)+" "*blanks+line)
             
             # Read label field
             label = line[0:10].strip()
@@ -127,7 +127,7 @@ for ind, line in enumerate(sic_assembly):
                     break
                 # Else insert [label, LOCCTR] into SYMTAB
                 else:
-                    symbol_table[label] = hex(loc_ctr)[2:]
+                    symbol_table[label] = '{0:02X}'.format(loc_ctr)
 
             # Read opcode field
             # Search OPTAB for OPCODE
@@ -156,9 +156,9 @@ for ind, line in enumerate(sic_assembly):
                 # Place literals into a pool at some location in object program
                 elif opcode == "LTORG":
                     for key in literal_table:
-                        literal_table[key][2] = hex(loc_ctr)[2:]
+                        literal_table[key][2] = '{0:02X}'.format(loc_ctr)
                         blanks = 6-len(str(hex(loc_ctr)[2:]))
-                        intermid_file.write(hex(loc_ctr)[2:]+" "*blanks+"*"+" "*7+"="+key+"\n")
+                        intermid_file.write('{0:02X}'.format(loc_ctr)+" "*blanks+"*"+" "*7+"="+key+"\n")
                         loc_ctr += int(literal_table[key][1])
                     literal_table = {}
             else:
@@ -206,9 +206,9 @@ if(opcode == "END"):
 # If not LTORG has came after them 
 if literal_table:
     for key in literal_table:
-        literal_table[key][2] = hex(loc_ctr)[2:]
+        literal_table[key][2] = '{0:02X}'.format(loc_ctr)
         blanks = 6-len(str(hex(loc_ctr)[2:]))
-        intermid_file.write(hex(loc_ctr)[2:]+" "*blanks+"*"+" "*7+"="+key+"\n")
+        intermid_file.write('{0:02X}'.format(loc_ctr)+" "*blanks+"*"+" "*7+"="+key+"\n")
         loc_ctr += int(literal_table[key][1])
 
 # Save (loc_ctr - starting add ) as program length

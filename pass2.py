@@ -34,7 +34,7 @@ def modify_add(address, indexed, object_code):
 
 
 def write_to_text_record(object_file, text_record_length, text_record_object_code, text_record):
-    text_record += (hex(int(text_record_length/2))[2:]+"^"+text_record_object_code)
+    text_record += ('{0:02X}'.format(int(text_record_length/2))+"^"+text_record_object_code)
     object_file.write("\n"+text_record)
 
 
@@ -75,34 +75,34 @@ def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, pro
             # Create header record 
             blanks = 6-len(str((prog_name)))
             prog_name+=' '*blanks
-            start_add="0"*2+str(hex(start_add)[2:])
-            prog_leng = (6-len(str(prog_leng)))*'0'+str(hex(prog_leng)[2:])
-            header_record +=('H'+prog_name+start_add+prog_leng)
+            start_add="0"*2+'{0:02X}'.format(int(start_add))
+            prog_leng = (6-len(str(prog_leng)))*'0'+'{0:02X}'.format(int(prog_leng))
+            header_record +=('H^'+prog_name+'^'+start_add+'^'+prog_leng)
             
             # Write header record to object program
             object_file.write(header_record)
             
             # Initilize next text record
-            if ind+1 not in range(len(sic_assembly)):
-                text_record = 'T'+"0"*2+sic_assembly[ind+1][0:5].strip()+"^"
+            if ind+1 in range(len(sic_assembly)):
+                text_record = 'T^'+"0"*2+sic_assembly[ind+1][0:4].strip()+"^"
                 text_record_object_code = "" 
             continue
         
         if opcode != 'START' and ind == 0:
-            header_record +=('H'+prog_name+"000000"+hex(prog_leng)[2:])
+            header_record +=('H^'+prog_name+'^'+"000000"+'^'+hex(prog_leng)[2:])
             start_add = "000000"
             prog_leng = hex(loc_ctr)[2:]
             # Write header record to object program
             object_file.write(header_record)
             
             # Initilize next text record
-            text_record = 'T'+"0"*2+sic_assembly[ind+1][0:5].strip()+"^"
+            text_record = 'T^'+"0"*2+sic_assembly[ind+1][0:4].strip()+"^"
             text_record_object_code = ""
         # If opcode !='END':
 
         object_code = ""      
         if opcode not in directives:
-            # First segment of opject code
+            # First segment of object code
 
             # If opcode in opcode table
             if opcode in opt_table:
@@ -173,7 +173,7 @@ def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, pro
         
         if (discnt == True) and (sic_assembly[ind+1][17:26].strip()!='RESW' and sic_assembly[ind+1][17:26].strip()!='RESB'): 
             write_to_text_record(object_file, text_record_length, text_record_object_code, text_record)
-            text_record = 'T'+ '0'*2+sic_assembly[ind+1][0:5]+"^"
+            text_record = 'T^'+'0'*2+sic_assembly[ind+1][0:4]+"^"
             text_record_length = 0
             text_record_object_code = ""           
         
@@ -184,9 +184,9 @@ def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, pro
             
         elif discnt == False:
             write_to_text_record(object_file, text_record_length, text_record_object_code, text_record)
-            text_record = 'T'+ '0'*2+line[0:5]+"^"
+            text_record = 'T^'+'0'*2+line[0:4]+"^"
             text_record_length = len(object_code)
-            text_record_object_code = object_code+"^"
+            text_record_object_code = object_code + "^"
         
         if ind+1 not in range(len(sic_assembly)):
             write_to_text_record(object_file, text_record_length, text_record_object_code, text_record)
@@ -198,7 +198,7 @@ def send_tables(symbol_table, opt_table, literal_tab, directives, prog_name, pro
         
 
     if end_exist == True:
-        end_record = 'E'+start_add
+        end_record = 'E^'+start_add
         object_file.write("\n"+end_record)
     
       
